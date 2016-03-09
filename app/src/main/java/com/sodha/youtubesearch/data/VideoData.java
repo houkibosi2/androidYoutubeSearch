@@ -2,13 +2,14 @@ package com.sodha.youtubesearch.data;
 
 import com.sodha.youtubesearch.utils.YouTubeTimeConvert;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 /**
  * Created by sodha on 8/3/16.
  */
-public class VideoData {
+public class VideoData implements Serializable {
     private String kind;
     private String id;
     private String videoTitle;

@@ -43,11 +43,11 @@ public class MainActivityListAdapter extends RecyclerView.Adapter<MainActivityLi
         imageLoader = CustomVolleyRequest.getInstance(context).getImageLoader();
         imageLoader.get(video.getMediumThumbnail(), ImageLoader.getImageListener(holder.imageView, R.drawable.ic_action_android, R.drawable.ic_action_android));
         holder.imageView.setImageUrl(video.getMediumThumbnail(), imageLoader);
-        holder.timeAgo.setText(video.getPublishedAt());
         holder.uploaderName.setText(video.getChannelTitle());
         holder.videoName.setText(video.getVideoTitle());
-        holder.views.setText(video.getViewCount());
+        holder.views.setText(video.getViewCount() + " views");
         holder.duration.setText(video.getDuration());
+        holder.timeAgo.setText(video.getPublishedAt());
     }
 
     @Override
@@ -65,9 +65,9 @@ public class MainActivityListAdapter extends RecyclerView.Adapter<MainActivityLi
         public NetworkImageView imageView;
         public TextView videoName;
         public TextView uploaderName;
-        public TextView timeAgo;
         public TextView views;
         public TextView duration;
+        public TextView timeAgo;
 
         public ViewHolder(View itemView) {
             super(itemView);

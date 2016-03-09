@@ -13,6 +13,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.sodha.youtubesearch.R;
@@ -23,6 +25,7 @@ import com.sodha.youtubesearch.config.Config;
 import com.sodha.youtubesearch.config.JsonKeys;
 import com.sodha.youtubesearch.data.VideoData;
 import com.sodha.youtubesearch.utils.EndlessRecyclerOnScrollListner;
+import com.sodha.youtubesearch.utils.NetworkUtil;
 import com.sodha.youtubesearch.utils.RecyclerItemClickListener;
 
 import org.json.JSONArray;
@@ -47,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        int status = NetworkUtil.getConnectivityStatusString(getApplicationContext());
+        if(status == NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
+            Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_LONG).show();
+        }
+
         recyclerView = (RecyclerView)findViewById(R.id.mainRecycleList);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
@@ -57,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(View view, int position) {
                 VideoData intentData = videoList.get(position);
                 Intent videoDetailsIntent = new Intent(getApplicationContext(), VideoDetail.class);
-//                videoDetailsIntent.putExtra("ob", (Serializable)intentData);
+                videoDetailsIntent.putExtra("ob", intentData);
                 startActivity(videoDetailsIntent);
             }
         }));
@@ -85,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void parseData(JSONArray items) {
+        List<VideoData> tempVideoList = new ArrayList<>();
         for (int i = 0; i < items.length(); i++) {
             VideoData video = new VideoData();
             try {
@@ -109,12 +119,14 @@ public class MainActivity extends AppCompatActivity {
                 video.setFavouriteCount(statistics.getString(JsonKeys.FAVORITE_COUNT));
                 video.setCommentCount(statistics.getString(JsonKeys.COMMENT_COUNT));
                 videoList.add(video);
+                tempVideoList.add(video);
             } catch (JSONException e) {
                 // TODO: 9/3/16 Handle Error
+
                 e.printStackTrace();
             }
         }
-        adapter.addAll(videoList);
+        adapter.addAll(tempVideoList);
         adapter.notifyDataSetChanged();
     }
     public void getData() {
@@ -126,7 +138,9 @@ public class MainActivity extends AppCompatActivity {
         MakeJsonObjectRequest.call(getApplicationContext(), Request.Method.GET, URL, null, new VolleyResponseListner() {
             @Override
             public void onError(String message) {
-                Log.e(TAG, "onError: " + message );
+                Log.e(TAG, "onError: " + message);
+                Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
+                // TODO: 10/3/16 Handle Error
             }
 
             @Override
@@ -138,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
                     parseData(items);
                 } catch (JSONException e) {
                     // TODO: 9/3/16 Handle Error
+                    Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
             }

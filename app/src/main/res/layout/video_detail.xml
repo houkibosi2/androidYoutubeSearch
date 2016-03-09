@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/layout_first"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -20,8 +20,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/videoDetailThumbnail"
-                android:background="#000"/>
-        </LinearLayout>
+                android:background="#000"
+                android:scaleType="centerCrop"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/detailDuration"
+                android:layout_alignLeft="@+id/videoDetailThumbnail"
+                android:layout_alignTop="@+id/videoDetailThumbnail"
+                android:layout_alignRight="@+id/videoDetailThumbnail"
+                android:layout_alignBottom="@+id/videoDetailThumbnail"
+                android:gravity="bottom|left"
+                android:textColor="#fff"
+                android:textSize="20sp" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/layout_second"
@@ -30,16 +43,25 @@
             android:layout_weight="0.4"
             android:orientation="horizontal">
 
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Large Text"
                 android:id="@+id/detailTitle"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+                android:layout_alignParentStart="true"
+                android:maxWidth="300dp"
+                android:ellipsize="end"
+                android:textSize="20sp"
+                android:layout_marginBottom="10dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#000"
+                android:layout_below="@+id/detailTitle"
+                android:layout_marginBottom="15dp"
+                android:layout_marginTop="5dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -48,18 +70,29 @@
                 android:id="@+id/detailViews"
                 android:layout_below="@+id/detailTitle"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+                android:layout_alignParentStart="true"
+                android:drawableLeft="@drawable/ic_action_eye_open"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Likes"
-                android:drawableLeft="@android:drawable/ic_media_play"
-                android:id="@+id/likes"
-                android:layout_below="@+id/detailViews"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+                android:drawableLeft="@drawable/ic_thumb_up"
+                android:id="@+id/detailLikes"
+                android:padding="2dp"
+                android:layout_alignBottom="@+id/detailViews"
+                android:layout_toRightOf="@+id/detailViews"
+                android:layout_toEndOf="@+id/detailViews" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/detailDislike"
+                android:drawableLeft="@drawable/ic_thumb_down"
+                android:layout_alignBottom="@+id/detailLikes"
+                android:layout_toRightOf="@+id/detailLikes"
+                android:layout_toEndOf="@+id/detailLikes"
+                android:layout_marginLeft="33dp"
+                android:layout_marginStart="33dp" />
 
         </RelativeLayout>
 

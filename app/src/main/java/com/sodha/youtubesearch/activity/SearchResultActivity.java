@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.sodha.youtubesearch.R;
@@ -127,6 +128,7 @@ public class SearchResultActivity extends AppCompatActivity {
             public void onError(String message) {
                 Log.e(TAG, "onError: " + message);
                 // TODO: 9/3/16 Handle Error
+                Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -155,6 +157,7 @@ public class SearchResultActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
                 // TODO: 9/3/16 Handle Error
+                Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
             }
         }
         String videoIdsForDetail = TextUtils.join(",", videoIdList);
@@ -184,6 +187,7 @@ public class SearchResultActivity extends AppCompatActivity {
 
     }
     public void parseData(JSONArray items) {
+        List<VideoData> tempVideoList = new ArrayList<>();
         for (int i = 0; i < items.length(); i++) {
             VideoData video = new VideoData();
             try {
@@ -208,12 +212,14 @@ public class SearchResultActivity extends AppCompatActivity {
                 video.setFavouriteCount(statistics.getString(JsonKeys.FAVORITE_COUNT));
                 video.setCommentCount(statistics.getString(JsonKeys.COMMENT_COUNT));
                 videoList.add(video);
+                tempVideoList.add(video);
             } catch (JSONException e) {
                 // TODO: 9/3/16 Handle Error
+//                Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         }
-        adapter.addAll(videoList);
+        adapter.addAll(tempVideoList);
         adapter.notifyDataSetChanged();
     }
     public void setScrollListener() {
