@@ -3,8 +3,10 @@ package com.sodha.youtubesearch.activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -64,13 +66,16 @@ public class SearchResultActivity extends AppCompatActivity {
             public void onItemClick(View view, int position) {
                 VideoData intentData = videoList.get(position);
                 Intent videoDetailsIntent = new Intent(getApplicationContext(), VideoDetail.class);
-//                videoDetailsIntent.putExtra("ob", (Serializable)intentData);
+                videoDetailsIntent.putExtra("ob", intentData);
                 startActivity(videoDetailsIntent);
             }
         }));
 
         adapter = new MainActivityListAdapter(getApplicationContext(), videoList);
         recyclerView.setAdapter(adapter);
+
+
+
         handleIntent(getIntent());
     }
 
@@ -84,6 +89,24 @@ public class SearchResultActivity extends AppCompatActivity {
                 (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
+
+        searchView.onActionViewExpanded();
+
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return true;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                CursorAdapter selectedView = searchView.getSuggestionsAdapter();
+                Cursor cursor = (Cursor) selectedView.getItem(position);
+                int index = cursor.getColumnIndexOrThrow(SearchManager.SUGGEST_COLUMN_TEXT_1);
+                searchView.setQuery(cursor.getString(index), true);
+                return true;
+            }
+        });
         return true;
     }
 
@@ -108,6 +131,7 @@ public class SearchResultActivity extends AppCompatActivity {
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             query = intent.getStringExtra(SearchManager.QUERY);
+            getSupportActionBar().setTitle(query);
             recyclerView.setOnScrollListener(null);
             setScrollListener();
             getData(query, null);
