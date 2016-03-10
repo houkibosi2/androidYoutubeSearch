@@ -61,9 +61,10 @@ public class VideoDetail extends AppCompatActivity {
         ((TextView)findViewById(R.id.detailLikes)).setText(videoDetail.getLikeCount());
         ((TextView)findViewById(R.id.detailDislike)).setText(videoDetail.getDislikeCount());
         ((TextView)findViewById(R.id.detailDuration)).setText(videoDetail.getDuration());
-        ((TextView)findViewById(R.id.detailViews)).setText(videoDetail.getViewCount());
+        ((TextView)findViewById(R.id.detailViews)).setText(videoDetail.getViewCount() + " views");
         ((TextView)findViewById(R.id.detailTitle)).setText(videoDetail.getVideoTitle());
         ((TextView)findViewById(R.id.detailUploaderName)).setText(videoDetail.getChannelTitle());
+        ((TextView)findViewById(R.id.detailFavorite)).setText(videoDetail.getFavouriteCount());
         FloatingActionButton playButton =   (FloatingActionButton)findViewById(R.id.playButton);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override

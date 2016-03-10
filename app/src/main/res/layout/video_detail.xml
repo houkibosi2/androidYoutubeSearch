@@ -58,13 +58,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="views"
                 android:id="@+id/detailViews"
-                android:drawableLeft="@drawable/ic_action_eye_open"
+                android:drawableLeft="@drawable/ic_visibility"
                 android:layout_below="@+id/detailUploaderName"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_marginTop="30dp"/>
+                android:layout_marginTop="30dp"
+                android:layout_marginRight="5dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -74,7 +74,8 @@
                 android:padding="2dp"
                 android:layout_alignBottom="@+id/detailViews"
                 android:layout_toRightOf="@+id/detailViews"
-                android:layout_toEndOf="@+id/detailViews" />
+                android:layout_toEndOf="@+id/detailViews"
+                android:layout_marginRight="5dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -83,9 +84,7 @@
                 android:drawableLeft="@drawable/ic_thumb_down"
                 android:layout_alignBottom="@+id/detailLikes"
                 android:layout_toRightOf="@+id/detailLikes"
-                android:layout_toEndOf="@+id/detailLikes"
-                android:layout_marginLeft="33dp"
-                android:layout_marginStart="33dp" />
+                android:layout_toEndOf="@+id/detailLikes" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -93,7 +92,18 @@
                 android:id="@+id/detailUploaderName"
                 android:layout_below="@+id/detailTitle"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+                android:layout_alignParentStart="true"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/detailFavorite"
+                android:layout_below="@+id/detailViews"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="5dp"
+                android:drawableLeft="@drawable/ic_favorite"/>
 
         </RelativeLayout>
 

@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
@@ -32,6 +33,7 @@ import com.sodha.youtubesearch.config.JsonKeys;
 import com.sodha.youtubesearch.data.VideoData;
 import com.sodha.youtubesearch.provider.SuggestionProvider;
 import com.sodha.youtubesearch.utils.EndlessRecyclerOnScrollListner;
+import com.sodha.youtubesearch.utils.NetworkChangeReceiver;
 import com.sodha.youtubesearch.utils.RecyclerItemClickListener;
 
 import org.json.JSONArray;
@@ -49,7 +51,8 @@ public class SearchResultActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
     private MainActivityListAdapter adapter;
-
+    static final String ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
+    static NetworkChangeReceiver networkChangeReceiver = new NetworkChangeReceiver();
     private List<VideoData> videoList = new ArrayList<>();
     private String nextPageToken = null;
     private String query = null;
@@ -57,13 +60,18 @@ public class SearchResultActivity extends AppCompatActivity {
     private int count = 0;
     ProgressDialog progressDialog;
     Button retryButton;
-
+    IntentFilter filter = new IntentFilter(ACTION);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_result_actvity);
 
         retryButton = (Button)findViewById(R.id.searchRetry);
+
+
+
+        this.registerReceiver(networkChangeReceiver, filter);
+
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         recyclerView = (RecyclerView)findViewById(R.id.searchRecycleList);
@@ -96,6 +104,20 @@ public class SearchResultActivity extends AppCompatActivity {
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
+//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                Log.i(TAG, "onQueryTextSubmit: ");
+//                return true;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                Log.i(TAG, "onQueryTextChange: ");
+//                return false;
+//            }
+//        });
+
         searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
             public boolean onSuggestionSelect(int position) {
@@ -117,14 +139,20 @@ public class SearchResultActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        count++;
-        Log.i(TAG, "onResume: " + count);
-        if(videoList.size() == 0 && count > 1) {
-            Toast.makeText(getApplicationContext(), "Resume", Toast.LENGTH_LONG).show();
-            getData(query, null);
-        }
+        this.registerReceiver(networkChangeReceiver, filter);
+//        count++;
+//        Log.i(TAG, "onResume: " + count);
+//        if(videoList.size() == 0 && count > 1) {
+//            Toast.makeText(getApplicationContext(), "Resume", Toast.LENGTH_LONG).show();
+//            getData(query, null);
+//        }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkChangeReceiver);
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -152,7 +180,6 @@ public class SearchResultActivity extends AppCompatActivity {
             recyclerView.setOnScrollListener(null);
             setScrollListener();
             getData(query, nextPageToken);
-            Log.i(TAG, "handleIntent: " + query);
             SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this, SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
             suggestions.saveRecentQuery(query, null);
         }

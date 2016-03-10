@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private int count = 0;
     ProgressDialog progressDialog;
     Button retryButton;
-
+    IntentFilter filter = new IntentFilter(ACTION);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         retryButton = (Button)findViewById(R.id.mainRetry);
-
-        IntentFilter filter = new IntentFilter(ACTION);
 
         this.registerReceiver(networkChangeReceiver, filter);
 
@@ -126,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        this.registerReceiver(networkChangeReceiver, filter);
         count++;
         Log.i(TAG, "onResume: " + count);
             if(videoList.size() == 0 && count > 1) {
@@ -206,5 +205,11 @@ public class MainActivity extends AppCompatActivity {
     private void handleError() {
         recyclerView.setVisibility(View.GONE);
         retryButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkChangeReceiver);
     }
 }
