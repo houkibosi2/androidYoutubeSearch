@@ -47,7 +47,7 @@ public class MainActivityListAdapter extends RecyclerView.Adapter<MainActivityLi
         holder.videoName.setText(video.getVideoTitle());
         holder.views.setText(video.getViewCount() + " views");
         holder.duration.setText(video.getDuration());
-        holder.timeAgo.setText(video.getPublishedAt());
+        holder.timeAgo.setText(video.getTimeAgo());
     }
 
     @Override

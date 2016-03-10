@@ -1,10 +1,19 @@
 package com.sodha.youtubesearch.data;
 
+import android.text.format.DateUtils;
+import android.util.Log;
+
+import com.sodha.youtubesearch.utils.TimeAgo;
 import com.sodha.youtubesearch.utils.YouTubeTimeConvert;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by sodha on 8/3/16.
@@ -28,19 +37,35 @@ public class VideoData implements Serializable {
     private String commentCount;
     private String publishedAt;
 
+    public String getTimeAgo() {
+        return timeAgo;
+    }
+
+    public void setTimeAgo(String timeAgo) {
+        this.timeAgo = timeAgo;
+    }
+
+    private String timeAgo;
+
     public String getPublishedAt() {
         return publishedAt;
     }
 
     public void setPublishedAt(String publishedAt) {
-        DateFormat format = new SimpleDateFormat("MMMM d, yyyy");
-        publishedAt = publishedAt.substring(0, 10);
+
         try {
-//            Date date = format.parse(timeAgo);
-            this.publishedAt = publishedAt;
+            DateTimeFormatter parser = ISODateTimeFormat.dateTimeParser();
+            DateTime dt = parser.parseDateTime(publishedAt);
+
+            long videoSecs = (dt.getMillis())/1000;
+            long nowSecs = (new Date().getTime())/1000;
+            long secs = nowSecs - videoSecs;
+            setTimeAgo(TimeAgo.getTimeAgo(secs));
         } catch (Exception e) {
             e.printStackTrace();
-            this.publishedAt = "";
+            setTimeAgo("NA");
+        } finally {
+            this.publishedAt = publishedAt;
         }
     }
 

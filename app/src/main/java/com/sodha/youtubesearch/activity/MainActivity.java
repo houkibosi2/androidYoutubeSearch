@@ -1,8 +1,10 @@
 package com.sodha.youtubesearch.activity;
 
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -24,9 +27,11 @@ import com.sodha.youtubesearch.adapter.MainActivityListAdapter;
 import com.sodha.youtubesearch.api.MakeJsonObjectRequest;
 import com.sodha.youtubesearch.api.VolleyResponseListner;
 import com.sodha.youtubesearch.config.Config;
+import com.sodha.youtubesearch.config.EndPoints;
 import com.sodha.youtubesearch.config.JsonKeys;
 import com.sodha.youtubesearch.data.VideoData;
 import com.sodha.youtubesearch.utils.EndlessRecyclerOnScrollListner;
+import com.sodha.youtubesearch.utils.NetworkChangeReceiver;
 import com.sodha.youtubesearch.utils.NetworkUtil;
 import com.sodha.youtubesearch.utils.RecyclerItemClickListener;
 
@@ -47,17 +52,23 @@ public class MainActivity extends AppCompatActivity {
     private List<VideoData> videoList = new ArrayList<>();
     private String nextPageToken = null;
     private SearchView searchView;
+    static final String ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
+    static NetworkChangeReceiver networkChangeReceiver = new NetworkChangeReceiver();
+    private int count = 0;
+    ProgressDialog progressDialog;
+    Button retryButton;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        retryButton = (Button)findViewById(R.id.mainRetry);
 
-        int status = NetworkUtil.getConnectivityStatusString(getApplicationContext());
-        if(status == NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
-            Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_LONG).show();
-        }
+        IntentFilter filter = new IntentFilter(ACTION);
+
+        this.registerReceiver(networkChangeReceiver, filter);
 
         recyclerView = (RecyclerView)findViewById(R.id.mainRecycleList);
         recyclerView.setHasFixedSize(true);
@@ -111,7 +122,18 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void parseData(JSONArray items) {
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        count++;
+        Log.i(TAG, "onResume: " + count);
+            if(videoList.size() == 0 && count > 1) {
+                getData();
+            }
+    }
+
+    private void parseData(JSONArray items) {
         List<VideoData> tempVideoList = new ArrayList<>();
         for (int i = 0; i < items.length(); i++) {
             VideoData video = new VideoData();
@@ -147,33 +169,42 @@ public class MainActivity extends AppCompatActivity {
         adapter.addAll(tempVideoList);
         adapter.notifyDataSetChanged();
     }
-    public void getData() {
-        String URL = Config.POPULARVIDEO_URL;
+    private void getData() {
+        progressDialog = ProgressDialog.show(this, "Loading Awesomeness", "Please Wait" , true);
+        String URL = EndPoints.POPULARVIDEO_URL;
         if(nextPageToken != null) {
             URL = URL + "&pageToken=" + nextPageToken;
         }
-        // TODO: 9/3/16 Add Spinners for loading data
         MakeJsonObjectRequest.call(getApplicationContext(), Request.Method.GET, URL, null, new VolleyResponseListner() {
             @Override
             public void onError(String message) {
-                Log.e(TAG, "onError: " + message);
                 Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
-                // TODO: 10/3/16 Handle Error
+                progressDialog.dismiss();
             }
 
             @Override
             public void onResponse(Object response) {
+                progressDialog.dismiss();
                 try {
-                    JSONObject jsonObject = (JSONObject)response;
+                    JSONObject jsonObject = (JSONObject) response;
                     nextPageToken = jsonObject.getString(JsonKeys.NEXT_PAGE_TOKEN);
                     JSONArray items = jsonObject.getJSONArray(JsonKeys.ITEMS);
                     parseData(items);
                 } catch (JSONException e) {
                     // TODO: 9/3/16 Handle Error
+                    handleError();
                     Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
             }
         });
+    }
+    public void mainRetry(View view) {
+        recyclerView.setVisibility(View.VISIBLE);
+        getData();
+    }
+    private void handleError() {
+        recyclerView.setVisibility(View.GONE);
+        retryButton.setVisibility(View.VISIBLE);
     }
 }

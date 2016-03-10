@@ -16,6 +16,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.sodha.youtubesearch.api.CustomVolleyRequest;
 import com.sodha.youtubesearch.config.Config;
+import com.sodha.youtubesearch.config.EndPoints;
 import com.sodha.youtubesearch.data.VideoData;
 import com.sodha.youtubesearch.R;
 /**
@@ -57,22 +58,17 @@ public class VideoDetail extends AppCompatActivity {
         ImageLoader imageLoader = CustomVolleyRequest.getInstance(context).getImageLoader();
         imageLoader.get(videoDetail.getLargeThumbnail(), ImageLoader.getImageListener(imageView, R.drawable.ic_action_android, R.drawable.ic_action_android));
         imageView.setImageUrl(videoDetail.getLargeThumbnail(), imageLoader);
-        TextView likes = (TextView)findViewById(R.id.detailLikes);
-        TextView dislikes = (TextView)findViewById(R.id.detailDislike);
-        TextView duration = (TextView)findViewById(R.id.detailDuration);
-        TextView views = (TextView)findViewById(R.id.detailViews);
-        TextView title = (TextView)findViewById(R.id.detailTitle);
+        ((TextView)findViewById(R.id.detailLikes)).setText(videoDetail.getLikeCount());
+        ((TextView)findViewById(R.id.detailDislike)).setText(videoDetail.getDislikeCount());
+        ((TextView)findViewById(R.id.detailDuration)).setText(videoDetail.getDuration());
+        ((TextView)findViewById(R.id.detailViews)).setText(videoDetail.getViewCount());
+        ((TextView)findViewById(R.id.detailTitle)).setText(videoDetail.getVideoTitle());
+        ((TextView)findViewById(R.id.detailUploaderName)).setText(videoDetail.getChannelTitle());
         FloatingActionButton playButton =   (FloatingActionButton)findViewById(R.id.playButton);
-
-        likes.setText(videoDetail.getLikeCount());
-        dislikes.setText(videoDetail.getDislikeCount());
-        duration.setText(videoDetail.getDuration());
-        views.setText(videoDetail.getViewCount());
-        title.setText(videoDetail.getVideoTitle());
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Config.YOUTUBE_URL_VIDEO + videoDetail.getVideoId())));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(EndPoints.YOUTUBE_URL_VIDEO + videoDetail.getVideoId())));
             }
         });
     }

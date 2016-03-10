@@ -60,10 +60,11 @@
                 android:layout_height="wrap_content"
                 android:text="views"
                 android:id="@+id/detailViews"
-                android:layout_below="@+id/detailTitle"
+                android:drawableLeft="@drawable/ic_action_eye_open"
+                android:layout_below="@+id/detailUploaderName"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:drawableLeft="@drawable/ic_action_eye_open"/>
+                android:layout_marginTop="30dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -85,6 +86,14 @@
                 android:layout_toEndOf="@+id/detailLikes"
                 android:layout_marginLeft="33dp"
                 android:layout_marginStart="33dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/detailUploaderName"
+                android:layout_below="@+id/detailTitle"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
 
         </RelativeLayout>
 

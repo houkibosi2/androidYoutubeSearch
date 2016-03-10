@@ -2,4 +2,5 @@
     <string name="app_name">YouTube Search</string>
     <string name="menu_search">Type video name</string>
     <string name="search_hint">Video Name</string>
+    <string name="popular_videos">Popular Videos</string>
 </resources>

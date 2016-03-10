@@ -1,5 +1,6 @@
 package com.sodha.youtubesearch.activity;
 
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -25,6 +27,7 @@ import com.sodha.youtubesearch.adapter.MainActivityListAdapter;
 import com.sodha.youtubesearch.api.MakeJsonObjectRequest;
 import com.sodha.youtubesearch.api.VolleyResponseListner;
 import com.sodha.youtubesearch.config.Config;
+import com.sodha.youtubesearch.config.EndPoints;
 import com.sodha.youtubesearch.config.JsonKeys;
 import com.sodha.youtubesearch.data.VideoData;
 import com.sodha.youtubesearch.provider.SuggestionProvider;
@@ -51,11 +54,17 @@ public class SearchResultActivity extends AppCompatActivity {
     private String nextPageToken = null;
     private String query = null;
     private SearchView searchView;
+    private int count = 0;
+    ProgressDialog progressDialog;
+    Button retryButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_result_actvity);
+
+        retryButton = (Button)findViewById(R.id.searchRetry);
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         recyclerView = (RecyclerView)findViewById(R.id.searchRecycleList);
         recyclerView.setHasFixedSize(true);
@@ -73,9 +82,6 @@ public class SearchResultActivity extends AppCompatActivity {
 
         adapter = new MainActivityListAdapter(getApplicationContext(), videoList);
         recyclerView.setAdapter(adapter);
-
-
-
         handleIntent(getIntent());
     }
 
@@ -89,8 +95,6 @@ public class SearchResultActivity extends AppCompatActivity {
                 (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
-
-        searchView.onActionViewExpanded();
 
         searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
@@ -109,6 +113,18 @@ public class SearchResultActivity extends AppCompatActivity {
         });
         return true;
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        count++;
+        Log.i(TAG, "onResume: " + count);
+        if(videoList.size() == 0 && count > 1) {
+            Toast.makeText(getApplicationContext(), "Resume", Toast.LENGTH_LONG).show();
+            getData(query, null);
+        }
+    }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -130,18 +146,20 @@ public class SearchResultActivity extends AppCompatActivity {
 
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            nextPageToken = null;
             query = intent.getStringExtra(SearchManager.QUERY);
             getSupportActionBar().setTitle(query);
             recyclerView.setOnScrollListener(null);
             setScrollListener();
-            getData(query, null);
+            getData(query, nextPageToken);
             Log.i(TAG, "handleIntent: " + query);
             SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this, SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
             suggestions.saveRecentQuery(query, null);
         }
     }
     public void getData(String q, String nextToken) {
-        String URL = Config.SEARCH_VIDEO_URL;
+        progressDialog = ProgressDialog.show(this, "Loading Awesomeness", "Please Wait" , true);
+        String URL = EndPoints.SEARCH_VIDEO_URL;
         if(nextToken != null) {
             URL = URL + "&pageToken=" + nextToken;
         }
@@ -153,6 +171,7 @@ public class SearchResultActivity extends AppCompatActivity {
                 Log.e(TAG, "onError: " + message);
                 // TODO: 9/3/16 Handle Error
                 Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
+                progressDialog.dismiss();
             }
 
             @Override
@@ -182,22 +201,25 @@ public class SearchResultActivity extends AppCompatActivity {
                 e.printStackTrace();
                 // TODO: 9/3/16 Handle Error
                 Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
+                progressDialog.dismiss();
             }
         }
         String videoIdsForDetail = TextUtils.join(",", videoIdList);
         getVideoDetails(videoIdsForDetail);
     }
     public void getVideoDetails(String Ids) {
-        String  URL =  Config.VIDEO_DETAILS_URL + "&id=" + Ids;
+        String  URL =  EndPoints.VIDEO_DETAILS_URL + "&id=" + Ids;
 
         MakeJsonObjectRequest.call(getApplicationContext(), Request.Method.GET, URL, null, new VolleyResponseListner() {
             @Override
             public void onError(String message) {
                 Log.e(TAG, "onError: " + message);
+                progressDialog.dismiss();
             }
 
             @Override
             public void onResponse(Object response) {
+                progressDialog.dismiss();
                 try {
                     JSONObject jsonObject = (JSONObject) response;
                     JSONArray itemsArray = jsonObject.getJSONArray(JsonKeys.ITEMS);
@@ -205,11 +227,10 @@ public class SearchResultActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
         });
-
     }
+
     public void parseData(JSONArray items) {
         List<VideoData> tempVideoList = new ArrayList<>();
         for (int i = 0; i < items.length(); i++) {
@@ -239,7 +260,6 @@ public class SearchResultActivity extends AppCompatActivity {
                 tempVideoList.add(video);
             } catch (JSONException e) {
                 // TODO: 9/3/16 Handle Error
-//                Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         }
@@ -254,5 +274,14 @@ public class SearchResultActivity extends AppCompatActivity {
                 getData(query, nextPageToken);
             }
         });
+    }
+    private void handleError() {
+        recyclerView.setVisibility(View.GONE);
+        retryButton.setVisibility(View.VISIBLE);
+    }
+    public void searchRetry(View view) {
+        recyclerView.setVisibility(View.VISIBLE);
+        retryButton.setVisibility(View.GONE);
+        getData(query, null);
     }
 }
