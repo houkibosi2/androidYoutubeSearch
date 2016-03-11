@@ -32,7 +32,7 @@ public class MainActivityListAdapter extends RecyclerView.Adapter<MainActivityLi
 
     @Override
     public MainActivityListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.video_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.video_row_card, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
